@@ -129,7 +129,7 @@ function RegisterPage() {
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
                       <Input 
                         name="username" 
-                        placeholder="nta_ananta"
+                        placeholder="daniel_john"
                         className="pl-10 h-12 bg-white/5 border-white/10 focus:border-purple-500/50 transition-all text-white placeholder:text-slate-600 rounded-xl"
                         onChange={handleChange} required 
                       />
