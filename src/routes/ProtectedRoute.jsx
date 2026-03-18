@@ -1,78 +1,57 @@
-// src/routes/ProtectedRoute.jsx
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { Loader2 } from 'lucide-react';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+useEffect(() => {
+    const checkUserAndRole = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (authUser) {
+        setUser(authUser);
+        
+        // AMBIL ROLE
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', authUser.id)
+          .single();
+        
+        if (error) {
+          console.error("Error ambil profil:", error.message);
+        }
+
+        console.log("ROLE DITEMUKAN:", profile?.role); // LIHAT DI INSPECT CONSOLE
+        setRole(profile?.role || 'user');
+      }
       setLoading(false);
     };
-    checkUser();
+    checkUserAndRole();
   }, []);
 
-  // ===== TAMPILAN LOADING SCREEN =====
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',          // Memenuhi seluruh tinggi layar
-        backgroundColor: '#fff',  // Latar belakang putih bersih
-      }}>
-        {/* Lingkaran Spinner */}
-        <div style={{
-          width: '50px',
-          height: '50px',
-          border: '5px solid rgba(170, 59, 255, 0.2)', // Warna ungu transparan
-          borderTop: '5px solid #aa3bff',              // Warna ungu solid di bagian atas
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }}></div>
-        
-        {/* Teks Memuat */}
-        <h3 style={{ 
-          marginTop: '20px', 
-          color: '#aa3bff', 
-          fontFamily: 'sans-serif',
-          fontWeight: '500'
-        }}>
-          Memuat...
-        </h3>
-
-        {/* CSS Inject untuk animasi putaran */}
-        <style>
-          {`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}
-        </style>
+      <div className="flex flex-col items-center justify-center h-screen bg-slate-950 text-purple-500 gap-4">
+        <Loader2 className="w-10 h-10 animate-spin" />
+        <p className="font-bold tracking-widest text-xs uppercase">Authenticating Terminal...</p>
       </div>
     );
   }
 
-  // Jika tidak ada user yang login, lempar ke halaman login
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  // Jika tidak login
+  if (!user) return <Navigate to="/login" replace />;
 
-  // Jika user sudah login, cek apakah role-nya sesuai dengan yang diizinkan
-  const userRole = user.user_metadata?.role || 'user';
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    // Jika user biasa mencoba masuk ke /admin, lempar ke halaman utama
+  // Jika role tidak diizinkan
+  if (allowedRoles && !allowedRoles.includes(role)) {
+    console.log("Access Denied for role:", role); // Untuk debug di console
     return <Navigate to="/" replace />;
   }
 
-  // Jika aman, render halamannya
   return children;
 };
 

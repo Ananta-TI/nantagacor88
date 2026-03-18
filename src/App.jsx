@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import LandingPage from './pages/user/LandingPage';
-// import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 // Import Route Guard
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -33,14 +33,14 @@ function App() {
         /> */}
 
         {/* Rute Khusus Admin (Hanya yang sudah login dan role-nya 'admin') */}
-        {/* <Route 
+        <Route 
           path="/admin" 
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboard />
             </ProtectedRoute>
           } 
-        /> */}
+        />
         
       </Routes>
     </BrowserRouter>
