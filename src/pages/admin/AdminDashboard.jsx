@@ -1,3 +1,4 @@
+// src/pages/admin/AdminDashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../supabaseClient';
 import { 
@@ -8,7 +9,9 @@ import {
   LogOut, 
   Search,
   MoreVertical,
-  Loader2
+  Loader2,
+  Coins, // Tambahan icon
+  Plus   // Tambahan icon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,13 +22,16 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-// import { Separator } from "@/components/ui/separator";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+
+  // --- STATE BARU UNTUK TOP UP ---
+  const [topUpAmounts, setTopUpAmounts] = useState({}); // Menyimpan input tiap user berdasarkan ID
+  const [processingId, setProcessingId] = useState(null); // Efek loading saat tombol di-klik
 
   useEffect(() => {
     fetchUsers();
@@ -51,6 +57,43 @@ function AdminDashboard() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/login');
+  };
+
+  // --- FUNGSI BARU UNTUK TOP UP ---
+  const handleAmountChange = (userId, value) => {
+    setTopUpAmounts(prev => ({ ...prev, [userId]: value }));
+  };
+
+  const handleTopUp = async (userId, currentCrystals) => {
+    const amount = parseInt(topUpAmounts[userId]);
+    
+    if (!amount || isNaN(amount) || amount <= 0) {
+      alert("Masukkan jumlah crystal yang valid!");
+      return;
+    }
+
+    setProcessingId(userId);
+    try {
+      const newBalance = parseInt(currentCrystals || 0) + amount;
+
+      // Update data di Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({ crystals: newBalance })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      // Update UI seketika tanpa refresh
+      setUsers(users.map(u => u.id === userId ? { ...u, crystals: newBalance } : u));
+      setTopUpAmounts(prev => ({ ...prev, [userId]: '' })); // Kosongkan input
+      
+    } catch (error) {
+      console.error("Gagal top up:", error);
+      alert("Gagal menambahkan crystals. Cek RLS di Supabase.");
+    } finally {
+      setProcessingId(null);
+    }
   };
 
   // Filter user berdasarkan search box
@@ -155,7 +198,7 @@ function AdminDashboard() {
         <Card className="bg-slate-900/50 border-white/5">
           <CardHeader>
             <CardTitle>User Management</CardTitle>
-            <CardDescription>Daftar seluruh pengguna yang terdaftar di RoyalWin.</CardDescription>
+            <CardDescription>Daftar seluruh pengguna yang terdaftar di sistem Gacha.</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -171,7 +214,7 @@ function AdminDashboard() {
                     <TableHead>Username</TableHead>
                     <TableHead>Email Address</TableHead>
                     <TableHead>Role</TableHead>
-                    <TableHead>Joined Date</TableHead>
+                    <TableHead>Crystals</TableHead> {/* Kolom Baru */}
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -192,13 +235,36 @@ function AdminDashboard() {
                           {u.role?.toUpperCase()}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500">
-                        {new Date(u.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      
+                      {/* Tampilan Saldo Crystal */}
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 font-bold text-amber-400">
+                          <Coins size={14} /> {u.crystals || 0}
+                        </div>
                       </TableCell>
+
+                      {/* Kolom Action + Form Top Up */}
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" className="hover:bg-white/10">
-                          <MoreVertical size={16} />
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Input 
+                            type="number" 
+                            placeholder="+0" 
+                            className="w-20 h-8 bg-slate-950 border-white/10 text-xs text-right"
+                            value={topUpAmounts[u.id] || ''}
+                            onChange={(e) => handleAmountChange(u.id, e.target.value)}
+                          />
+                          <Button 
+                            size="sm" 
+                            className="h-8 bg-emerald-600 hover:bg-emerald-500 px-2"
+                            disabled={processingId === u.id}
+                            onClick={() => handleTopUp(u.id, u.crystals)}
+                          >
+                            {processingId === u.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                          </Button>
+                          <Button variant="ghost" size="icon" className="hover:bg-white/10 h-8 w-8">
+                            <MoreVertical size={16} />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

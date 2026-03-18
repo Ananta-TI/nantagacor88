@@ -6,6 +6,7 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import LandingPage from './pages/user/LandingPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import GachaPage from './pages/user/GachaPage'; // <-- IMPORT HALAMAN BARU
 
 // Import Route Guard
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -14,25 +15,22 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rute Publik (Semua orang bisa akses, termasuk yang belum login) */}
+        {/* Rute Publik */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        
-        {/* === PERUBAHAN DI SINI === */}
-        {/* Landing Page sekarang jadi Rute Publik agar tombol Login/Register bisa terlihat */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* Nanti kalau kamu buat halaman fitur khusus yang butuh login, baru pakai ProtectedRoute: */}
-        {/* <Route 
-          path="/dashboard-user" 
+        {/* Rute User Terproteksi */}
+        <Route 
+          path="/gacha" 
           element={
             <ProtectedRoute allowedRoles={['user', 'admin']}>
-              <DashboardUser />
+              <GachaPage /> {/* <-- TAMBAHKAN DI SINI */}
             </ProtectedRoute>
           } 
-        /> */}
+        />
 
-        {/* Rute Khusus Admin (Hanya yang sudah login dan role-nya 'admin') */}
+        {/* Rute Khusus Admin */}
         <Route 
           path="/admin" 
           element={

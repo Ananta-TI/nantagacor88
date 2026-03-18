@@ -33,25 +33,42 @@ function LoginPage() {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: '', text: '' });
 
     try {
+      // 1. TAMBAHKAN 'role' DI SINI
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles').select('email').eq('username', formData.username).maybeSingle();
+        .from('profiles')
+        .select('email, role') // Ambil email DAN role
+        .eq('username', formData.username)
+        .maybeSingle();
 
       if (profileError || !profileData) throw new Error('Username tidak ditemukan!');
 
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: profileData.email, password: formData.password,
+        email: profileData.email, 
+        password: formData.password,
       });
 
       if (authError) throw authError;
 
       setMessage({ type: 'success', text: 'Berhasil masuk! Mengalihkan...' });
-      setTimeout(() => navigate(authData.user.user_metadata?.role === 'admin' ? '/admin' : '/'), 1500);
+      
+      // 2. CEK ROLE DARI profileData ATAU user_metadata
+      const userRole = profileData.role || authData.user.user_metadata?.role;
+      
+      // 3. ARAHKAN SESUAI ROLE
+      setTimeout(() => {
+        if (userRole === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
+      }, 1500);
+
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
     } finally {
