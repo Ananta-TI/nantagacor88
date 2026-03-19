@@ -7,6 +7,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import LandingPage from './pages/user/LandingPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import GachaPage from './pages/user/GachaPage'; // <-- IMPORT HALAMAN BARU
+import ProfilePage from './pages/user/ProfilePage'; // <-- IMPORT HALAMAN PROFILE
 
 // Import Route Guard
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -26,6 +27,16 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['user', 'admin']}>
               <GachaPage /> {/* <-- TAMBAHKAN DI SINI */}
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* === TAMBAHKAN RUTE PROFILE DI SINI === */}
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute allowedRoles={['user', 'admin']}>
+              <ProfilePage />
             </ProtectedRoute>
           } 
         />
