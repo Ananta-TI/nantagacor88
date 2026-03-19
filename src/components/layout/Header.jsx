@@ -3,35 +3,43 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Crown, Menu, X, Coins, LogOut, User } from 'lucide-react';
+import { Crown, Menu, X, Coins, LogOut, Shield } from 'lucide-react'; // 👈 Tambah icon Shield
 import { Button } from "@/components/ui/button";
 
 export default function Header() {
   const [user, setUser] = useState(null);
   const [balance, setBalance] = useState(0);
+  const [role, setRole] = useState(null); // 👈 Tambah state untuk role
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   // Animasi background navbar saat di-scroll
   const { scrollY } = useScroll();
-  const navBg = useTransform(scrollY, [0, 50], ["rgba(2, 6, 23, 0)", "rgba(2, 6, 23, 0.8)"]);
+  const navBg = useTransform(scrollY, [0, 50], ["rgba(2, 6, 23, 0)", "rgba(2, 6, 23, 0.95)"]);
   const navBorder = useTransform(scrollY, [0, 50], ["rgba(255,255,255,0)", "rgba(255,255,255,0.05)"]);
 
   useEffect(() => {
-    const fetchUserAndBalance = async () => {
+    const fetchUserData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
 
       if (user) {
-        const { data } = await supabase.from('profiles').select('crystals').eq('id', user.id).single();
-        if (data) setBalance(data.crystals);
+        // 👈 Ambil crystals DAN role sekalian
+        const { data } = await supabase.from('profiles').select('crystals, role').eq('id', user.id).single();
+        if (data) {
+          setBalance(data.crystals);
+          setRole(data.role);
+        }
       }
     };
-    fetchUserAndBalance();
+    fetchUserData();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (!session?.user) setBalance(0);
+      if (!session?.user) {
+        setBalance(0);
+        setRole(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -54,13 +62,22 @@ export default function Header() {
           <div className="p-2 bg-yellow-500 rounded-lg group-hover:rotate-12 transition-transform">
             <Crown className="w-6 h-6 text-black" />
           </div>
-          <span className="text-xl font-black tracking-tighter italic text-white">nantagacor 88</span>
+          <span className="text-xl font-black tracking-tighter italic text-white">NantaGacor<span className="text-yellow-500">88</span></span>
         </Link>
 
         {/* DESKTOP MENU */}
         <div className="hidden md:flex items-center gap-6">
           {user ? (
             <div className="flex items-center gap-4">
+              
+              {/* 👈 TOMBOL ADMIN (Hanya muncul jika role === 'admin') */}
+              {role === 'admin' && (
+                <Link to="/admin" className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 px-4 py-1.5 rounded-full border border-red-500/30 transition-colors">
+                  <Shield className="w-4 h-4 text-red-500" />
+                  <span className="text-xs font-bold text-red-500 uppercase tracking-widest">Admin Panel</span>
+                </Link>
+              )}
+
               {/* Saldo / Balance */}
               <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1.5 rounded-full">
                 <Coins className="w-4 h-4 text-yellow-400" />
@@ -77,7 +94,7 @@ export default function Header() {
 
               <div className="w-[1px] h-4 bg-white/20" />
               <button onClick={handleLogout} className="text-xs text-slate-400 hover:text-red-400 font-bold transition-colors uppercase tracking-widest flex items-center gap-1">
-                <LogOut className="w-3 h-3" />
+                <LogOut className="w-4 h-4" />
               </button>
             </div>
           ) : (
@@ -125,6 +142,16 @@ export default function Header() {
                     </div>
                   </div>
                 </div>
+
+                {/* 👈 TOMBOL ADMIN MOBILE (Hanya muncul jika role === 'admin') */}
+                {role === 'admin' && (
+                  <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full bg-red-500/10 border-red-500/30 text-red-500 font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-red-500 hover:text-black">
+                      <Shield className="w-4 h-4" /> Dashboard Admin
+                    </Button>
+                  </Link>
+                )}
+
                 <Button onClick={handleLogout} variant="destructive" className="w-full font-bold uppercase tracking-widest flex items-center gap-2">
                   <LogOut className="w-4 h-4" /> Logout
                 </Button>
