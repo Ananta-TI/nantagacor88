@@ -84,7 +84,7 @@ const LoadingState = () => (
   <div className="flex flex-col items-center justify-center py-20 gap-4">
     <div className="relative">
       <div className="w-12 h-12 rounded-full border-4 border-violet-500/20 border-t-violet-500 animate-spin" />
-      <div className="absolute inset-0 m-2 rounded-full border-4 border-blue-500/10 border-b-blue-500 animate-spin animate-[spin_1.5s_linear_infinite_reverse]" />
+      <div className="absolute inset-0 m-2 rounded-full border-4 border-blue-500/10 border-b-blue-500 animate-[spin_1.5s_linear_infinite_reverse]" />
     </div>
     <p className="text-xs font-black tracking-[0.3em] uppercase text-slate-500 animate-pulse text-center">
       Menghubungkan ke Database…
