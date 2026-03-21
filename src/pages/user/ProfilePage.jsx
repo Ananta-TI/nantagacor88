@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
+import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
+
 function ProfilePage() {
   const [user, setUser] = useState(null);
   const [profileData, setProfileData] = useState(null);
@@ -85,6 +88,7 @@ function ProfilePage() {
   }
 
   return (
+    
     <main className="min-h-screen bg-[#020617] text-white p-6 relative overflow-hidden">
       {/* Background Effect */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-96 bg-yellow-600/10 blur-[100px] rounded-full pointer-events-none" />

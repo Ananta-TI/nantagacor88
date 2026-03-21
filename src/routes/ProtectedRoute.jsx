@@ -38,7 +38,7 @@ useEffect(() => {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-slate-950 text-purple-500 gap-4">
         <Loader2 className="w-10 h-10 animate-spin" />
-        <p className="font-bold tracking-widest text-xs uppercase">Authenticating Terminal...</p>
+        <p className="font-bold tracking-widest text-xs uppercase">Memuat...</p>
       </div>
     );
   }
