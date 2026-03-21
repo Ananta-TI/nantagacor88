@@ -43,7 +43,7 @@ function App() {
 
         {/* Rute Khusus Admin */}
         <Route 
-          path="/admin" 
+          path="/adminDashboard" 
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboard />

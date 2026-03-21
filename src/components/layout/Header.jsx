@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import { motion, useScroll, AnimatePresence } from 'framer-motion';
-import { Crown, Menu, X, Coins, LogOut, Shield, Gem, ChevronDown, Wallet, User, Settings, BarChart2, Dices, Trophy, Headphones } from 'lucide-react';
+import { Crown, Menu, X, Coins, LogOut, Shield, Gem, ChevronDown, Wallet, User, Settings, BarChart2, Dices, Trophy, Headphones, ArrowLeft } from 'lucide-react';
 
 // ── NAV LINKS ────────────────────────────────────────────────────────
 const NAV_LINKS = [
@@ -72,7 +72,7 @@ const UserDropdown = ({ user, balance, role, onLogout }) => {
             <div className="p-2">
               {role === 'admin' && (
                 <Link
-                  to="/admin"
+                  to="/adminDashboard"
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 transition-colors group"
                 >
@@ -150,6 +150,9 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // 🔥 DETEKSI APAKAH USER SEDANG DI HALAMAN LOGIN ATAU REGISTER 🔥
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -186,7 +189,7 @@ export default function Header() {
     <>
       <motion.nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          scrolled
+          scrolled || isAuthPage
             ? 'bg-[#080c14]/90 backdrop-blur-2xl border-b border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
             : 'bg-transparent border-b border-transparent'
         }`}
@@ -197,263 +200,264 @@ export default function Header() {
           <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
             <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-700 flex items-center justify-center shadow-[0_0_16px_rgba(234,179,8,0.35)] group-hover:shadow-[0_0_24px_rgba(234,179,8,0.5)] transition-shadow">
               <Gem className="w-4 h-4 text-black" />
-              {/* shine */}
               <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent" />
             </div>
-            <span className="font-['Bebas_Neue'] text-[22px] tracking-widest leading-none">
+            <span className=" text-[22px] italic leading-[1] px-2 break-words text-white">
               NANTA<span className="text-yellow-500">GACOR88</span>
             </span>
           </Link>
 
-          {/* ── CENTER NAV ────────────────────────── */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {NAV_LINKS.map(({ label, href, icon }) => {
-              const active = location.pathname === href;
-              return (
-                <Link
-                  key={label}
-                  to={href}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
-                    active
-                      ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                      : 'text-white/50 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <span className={active ? 'text-yellow-500' : 'text-white/30'}>{icon}</span>
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
+          {/* ── CENTER NAV (Disembunyikan jika di halaman Auth) ── */}
+          {!isAuthPage && (
+            <nav className="hidden lg:flex items-center gap-1">
+              {NAV_LINKS.map(({ label, href, icon }) => {
+                const active = location.pathname === href;
+                return (
+                  <Link
+                    key={label}
+                    to={href}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                      active
+                        ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                        : 'text-white/50 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <span className={active ? 'text-yellow-500' : 'text-white/30'}>{icon}</span>
+                    {label}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
 
           {/* ── RIGHT SIDE ────────────────────────── */}
           <div className="flex items-center gap-3">
-
-            {/* Live support pill */}
-            <a
-              href="#"
-              className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 hover:bg-green-500/15 transition-colors"
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              <Headphones className="w-3.5 h-3.5 text-green-400" />
-              <span className="text-xs font-bold text-green-400 hidden xl:block">Live CS</span>
-            </a>
-
-            {user ? (
+            
+            {/* JIKA DI HALAMAN AUTH (LOGIN/REGISTER) */}
+            {isAuthPage ? (
+              <Link to="/">
+                <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 border border-white/10 hover:border-white/20 transition-all">
+                  <ArrowLeft className="w-4 h-4" /> Kembali
+                </button>
+              </Link>
+            ) : (
+              /* JIKA DI HALAMAN LAIN (NORMAL) */
               <>
-                {/* balance chip — md+ */}
-                <div className="hidden md:flex items-center gap-2 bg-yellow-500/8 border border-yellow-500/15 rounded-full px-3 py-1.5">
-                  <Coins className="w-3.5 h-3.5 text-yellow-500" />
-                  <span className="text-sm font-black font-mono text-yellow-400">{balance.toLocaleString()}</span>
-                </div>
+                {/* Live support pill */}
+                <a
+                  href="#"
+                  className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 hover:bg-green-500/15 transition-colors"
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                  <Headphones className="w-3.5 h-3.5 text-green-400" />
+                  <span className="text-xs font-bold text-green-400 hidden xl:block">Live CS</span>
+                </a>
 
-                {/* admin badge — md+ */}
-                {role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 hover:bg-red-500/15 transition-colors"
-                  >
-                    <Shield className="w-3.5 h-3.5 text-red-400" />
-                    <span className="text-xs font-black text-red-400 uppercase tracking-widest">Admin</span>
-                  </Link>
+                {user ? (
+                  <>
+                    <div className="hidden md:flex items-center gap-2 bg-yellow-500/8 border border-yellow-500/15 rounded-full px-3 py-1.5">
+                      <Coins className="w-3.5 h-3.5 text-yellow-500" />
+                      <span className="text-sm font-black font-mono text-yellow-400">{balance.toLocaleString()}</span>
+                    </div>
+
+                    {role === 'admin' && (
+                      <Link
+                        to="/adminDashboard"
+                        className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 hover:bg-red-500/15 transition-colors"
+                      >
+                        <Shield className="w-3.5 h-3.5 text-red-400" />
+                        <span className="text-xs font-black text-red-400 uppercase tracking-widest">Admin</span>
+                      </Link>
+                    )}
+
+                    <UserDropdown user={user} balance={balance} role={role} onLogout={handleLogout} />
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Link to="/login">
+                      <button className="hidden sm:block px-4 py-2 rounded-full text-sm font-bold text-white/60 hover:text-white border border-white/10 hover:border-white/20 transition-all">
+                        Masuk
+                      </button>
+                    </Link>
+                    <Link to="/register">
+                      <motion.button
+                        whileHover={{ scale: 1.04, boxShadow: '0 0 24px rgba(234,179,8,0.35)' }}
+                        whileTap={{ scale: 0.96 }}
+                        className="relative overflow-hidden px-4 py-2 md:px-5 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 text-black font-black text-xs md:text-sm uppercase tracking-wider shadow-[0_0_18px_rgba(234,179,8,0.2)]"
+                      >
+                        <span className="relative z-10">Daftar</span>
+                      </motion.button>
+                    </Link>
+                  </div>
                 )}
 
-                {/* user dropdown */}
-                <UserDropdown user={user} balance={balance} role={role} onLogout={handleLogout} />
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link to="/login">
-                  <button className="px-4 py-2 rounded-full text-sm font-bold text-white/60 hover:text-white border border-white/10 hover:border-white/20 transition-all">
-                    Masuk
-                  </button>
-                </Link>
-                <Link to="/register">
-                  <motion.button
-                    whileHover={{ scale: 1.04, boxShadow: '0 0 24px rgba(234,179,8,0.35)' }}
-                    whileTap={{ scale: 0.96 }}
-                    className="relative overflow-hidden px-5 py-2 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 text-black font-black text-sm uppercase tracking-wider shadow-[0_0_18px_rgba(234,179,8,0.2)]"
-                  >
-                    {/* shimmer */}
-                    <motion.div
-                      className="absolute inset-0"
-                      style={{ background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%)' }}
-                      animate={{ x: ['-100%', '200%'] }}
-                      transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut', repeatDelay: 1 }}
-                    />
-                    <span className="relative z-10">Daftar Gratis</span>
-                  </motion.button>
-                </Link>
-              </div>
-            )}
-
-            {/* mobile hamburger */}
-            <button
-              onClick={() => setMobileMenuOpen(o => !o)}
-              className="lg:hidden w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={mobileMenuOpen ? 'close' : 'open'}
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.15 }}
+                {/* mobile hamburger (Hanya muncul jika bukan halaman Auth) */}
+                <button
+                  onClick={() => setMobileMenuOpen(o => !o)}
+                  className="lg:hidden w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
                 >
-                  {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-                </motion.div>
-              </AnimatePresence>
-            </button>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={mobileMenuOpen ? 'close' : 'open'}
+                      initial={{ rotate: -90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 90, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                    </motion.div>
+                  </AnimatePresence>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </motion.nav>
 
-      {/* ── MOBILE DRAWER ──────────────────────────────────────────── */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-            />
+      {/* ── MOBILE DRAWER (Disembunyikan sepenuhnya jika di halaman Auth) ── */}
+      {!isAuthPage && (
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              {/* backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+              />
 
-            {/* drawer */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-80 bg-[#0d1117] border-l border-white/10 shadow-2xl flex flex-col lg:hidden overflow-y-auto"
-            >
-              {/* drawer header */}
-              <div className="flex items-center justify-between p-5 border-b border-white/5">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center">
-                    <Gem className="w-3.5 h-3.5 text-black" />
-                  </div>
-                  <span className="font-['Bebas_Neue'] text-lg tracking-widest">NANTAGACOR88</span>
-                </div>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/50 hover:text-white"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* user section */}
-              {user ? (
-                <div className="p-4 border-b border-white/5">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center text-black font-black text-xl shadow-lg">
-                      {user?.user_metadata?.username?.[0]?.toUpperCase() || 'U'}
+              {/* drawer */}
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="fixed top-0 right-0 bottom-0 z-50 w-80 bg-[#0d1117] border-l border-white/10 shadow-2xl flex flex-col lg:hidden overflow-y-auto"
+              >
+                {/* Isian Drawer (Tetap sama seperti aslinya) */}
+                <div className="flex items-center justify-between p-5 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center">
+                      <Gem className="w-3.5 h-3.5 text-black" />
                     </div>
-                    <div>
-                      <p className="font-bold text-white">{user?.user_metadata?.username}</p>
-                      <p className="text-xs text-white/30 truncate max-w-[180px]">{user.email}</p>
-                    </div>
+                    <span className="font-['Bebas_Neue'] text-lg tracking-widest text-white">NANTAGACOR88</span>
                   </div>
-
-                  <div className="flex items-center justify-between bg-yellow-500/8 border border-yellow-500/15 rounded-xl px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Coins className="w-4 h-4 text-yellow-400" />
-                      <span className="text-xs text-white/50 font-semibold">Saldo Crystal</span>
-                    </div>
-                    <span className="font-black font-mono text-yellow-400">{balance.toLocaleString()}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-4 flex flex-col gap-3 border-b border-white/5">
-                  <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                    <button className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-600 text-black font-black uppercase tracking-widest text-sm">
-                      Daftar Gratis
-                    </button>
-                  </Link>
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest text-sm">
-                      Masuk
-                    </button>
-                  </Link>
-                </div>
-              )}
-
-              {/* nav links */}
-              <div className="p-4 flex flex-col gap-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 px-3 mb-2">Menu</p>
-                {NAV_LINKS.map(({ label, href, icon }) => {
-                  const active = location.pathname === href;
-                  return (
-                    <Link
-                      key={label}
-                      to={href}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-xl font-semibold text-sm transition-all ${
-                        active
-                          ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/15'
-                          : 'text-white/60 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      <span className={active ? 'text-yellow-500' : 'text-white/30'}>{icon}</span>
-                      {label}
-                    </Link>
-                  );
-                })}
-              </div>
-
-              {/* user actions */}
-              {user && (
-                <div className="p-4 flex flex-col gap-1 border-t border-white/5">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 px-3 mb-2">Akun</p>
-
-                  {role === 'admin' && (
-                    <Link to="/admin" onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-3 rounded-xl text-red-400 hover:bg-red-500/10 font-semibold text-sm transition-all"
-                    >
-                      <Shield className="w-4 h-4" /> Dashboard Admin
-                    </Link>
-                  )}
-
-                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 font-semibold text-sm transition-all"
-                  >
-                    <User className="w-4 h-4" /> Profil Saya
-                  </Link>
-
-                  <Link to="/deposit" onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 font-semibold text-sm transition-all"
-                  >
-                    <Wallet className="w-4 h-4" /> Deposit / WD
-                  </Link>
-
                   <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 px-3 py-3 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 font-semibold text-sm transition-all mt-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/50 hover:text-white"
                   >
-                    <LogOut className="w-4 h-4" /> Keluar
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
-              )}
 
-              {/* live cs */}
-              <div className="mt-auto p-4 border-t border-white/5">
-                <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/20 hover:bg-green-500/15 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center">
-                    <Headphones className="w-4 h-4 text-green-400" />
+                {user ? (
+                  <div className="p-4 border-b border-white/5">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center text-black font-black text-xl shadow-lg">
+                        {user?.user_metadata?.username?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                      <div>
+                        <p className="font-bold text-white">{user?.user_metadata?.username}</p>
+                        <p className="text-xs text-white/30 truncate max-w-[180px]">{user.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between bg-yellow-500/8 border border-yellow-500/15 rounded-xl px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Coins className="w-4 h-4 text-yellow-400" />
+                        <span className="text-xs text-white/50 font-semibold">Saldo Crystal</span>
+                      </div>
+                      <span className="font-black font-mono text-yellow-400">{balance.toLocaleString()}</span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-green-400">Live Support</p>
-                    <p className="text-xs text-green-400/50">Online 24/7 — respon cepat</p>
+                ) : (
+                  <div className="p-4 flex flex-col gap-3 border-b border-white/5">
+                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                      <button className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-600 text-black font-black uppercase tracking-widest text-sm">
+                        Daftar Gratis
+                      </button>
+                    </Link>
+                    <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                      <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest text-sm">
+                        Masuk
+                      </button>
+                    </Link>
                   </div>
-                  <div className="ml-auto w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                </a>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                )}
+
+                <div className="p-4 flex flex-col gap-1">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 px-3 mb-2">Menu</p>
+                  {NAV_LINKS.map(({ label, href, icon }) => {
+                    const active = location.pathname === href;
+                    return (
+                      <Link
+                        key={label}
+                        to={href}
+                        className={`flex items-center gap-3 px-3 py-3 rounded-xl font-semibold text-sm transition-all ${
+                          active
+                            ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/15'
+                            : 'text-white/60 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <span className={active ? 'text-yellow-500' : 'text-white/30'}>{icon}</span>
+                        {label}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {user && (
+                  <div className="p-4 flex flex-col gap-1 border-t border-white/5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20 px-3 mb-2">Akun</p>
+
+                    {role === 'admin' && (
+                      <Link to="/adminDashboard" onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-3 rounded-xl text-red-400 hover:bg-red-500/10 font-semibold text-sm transition-all"
+                      >
+                        <Shield className="w-4 h-4" /> Dashboard Admin
+                      </Link>
+                    )}
+
+                    <Link to="/profile" onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 font-semibold text-sm transition-all"
+                    >
+                      <User className="w-4 h-4" /> Profil Saya
+                    </Link>
+
+                    <Link to="/deposit" onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 font-semibold text-sm transition-all"
+                    >
+                      <Wallet className="w-4 h-4" /> Deposit / WD
+                    </Link>
+
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 px-3 py-3 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 font-semibold text-sm transition-all mt-2"
+                    >
+                      <LogOut className="w-4 h-4" /> Keluar
+                    </button>
+                  </div>
+                )}
+
+                <div className="mt-auto p-4 border-t border-white/5">
+                  <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/20 hover:bg-green-500/15 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center">
+                      <Headphones className="w-4 h-4 text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-green-400">Live Support</p>
+                      <p className="text-xs text-green-400/50">Online 24/7 — respon cepat</p>
+                    </div>
+                    <div className="ml-auto w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  </a>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      )}
     </>
   );
 }

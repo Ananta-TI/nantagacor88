@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
+import Header from '../../components/layout/Header';
+
+
 const Spotlight = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   return (
@@ -74,6 +77,7 @@ function RegisterPage() {
 
   return (
     <main className="relative flex items-center justify-center min-h-screen bg-[#020617] p-4 overflow-hidden">
+      <Header />
       {/* Background Magic */}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-50 contrast-150" />
       <div className="absolute h-full w-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
